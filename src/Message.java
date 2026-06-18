@@ -4,6 +4,10 @@ public class Message
 
     public Message(String payload)
     {
+        if(payload == null || payload.isBlank())
+        {
+            throw new IllegalArgumentException("Message passed cannot be null or blank");
+        }
         this.payload = payload;
     }
 
