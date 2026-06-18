@@ -10,7 +10,7 @@ public class Message
         }
         this.payload = payload;
     }
-
+    
     public String getPayload()
     {
         return this.payload;

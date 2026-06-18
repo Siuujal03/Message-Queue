@@ -33,7 +33,7 @@ public class MessageQueue
     
     public boolean offer(Message message)
     {
-        if(!isFull())
+        if(isFull())
         {
             return false;
         }
