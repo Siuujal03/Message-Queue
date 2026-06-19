@@ -1,3 +1,5 @@
+import java.util.Optional;
+
 public class Main 
 {
     public static void main(String arg[])
@@ -8,6 +10,20 @@ public class Main
 
         Producer producer = new Producer(mq);
 
-        System.out.println(producer.send(null));
+        System.out.println(producer.send(new Message("demo")));
+
+        Consumer consumer = new Consumer(mq);
+
+        Optional<Message> message = consumer.consume();
+
+        Optional<Message> message1 = consumer.consume();
+
+        if(!message1.isPresent())
+        {
+            System.out.println("Absent");
+        }
+        
+
+        
     }
 }
