@@ -6,10 +6,8 @@ public class Main
 
         // mq.offer(new Message(""));
 
-        for(int i = 0; i < 6; i++)
-        {
-            System.out.println(mq.offer(new Message("message")));
+        Producer producer = new Producer(mq);
 
-        }
+        System.out.println(producer.send(null));
     }
 }
