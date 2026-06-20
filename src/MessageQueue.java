@@ -1,9 +1,9 @@
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-public class MessageQueue 
+public class MessageQueue<T>
 {
-    private final Queue<Message> messages;
+    private final Queue<T> messages;
     private final int capacity;
 
     public MessageQueue(int capacity) 
@@ -31,7 +31,7 @@ public class MessageQueue
         return messages.size();
     }
     
-    public boolean offer(Message message)
+    public boolean offer(T message)
     {
         if(isFull())
         {
@@ -41,7 +41,7 @@ public class MessageQueue
         return true;
     }
 
-    public Message poll()
+    public T poll()
     {
         if(isEmpty())
         {
