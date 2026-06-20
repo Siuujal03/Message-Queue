@@ -18,9 +18,12 @@ public class Main
 
         Optional<Message> message1 = consumer.consume();
 
+        System.out.println(message.get());
+
         if(!message1.isPresent())
         {
             System.out.println("Absent");
+    
         }
         
 
