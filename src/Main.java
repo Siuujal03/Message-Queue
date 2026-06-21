@@ -4,29 +4,16 @@ public class Main
 {
     public static void main(String arg[])
     {
-        MessageQueue mq = new MessageQueue(5);
+        // MessageQueue<MessageDelivery> mq = new MessageQueue<>(5);
 
-        // mq.offer(new Message(""));
+        ReliableQueue rq = new ReliableQueue(5);
 
-        Producer producer = new Producer(mq);
+        System.out.println(rq.publish(new Message("hi")));
 
-        System.out.println(producer.send(new Message("demo")));
+        Message message = rq.receive().get();
 
-        Consumer consumer = new Consumer(mq);
+        System.out.println(rq.ack(message.getId()));
 
-        Optional<Message> message = consumer.consume();
-
-        Optional<Message> message1 = consumer.consume();
-
-        System.out.println(message.get());
-
-        if(!message1.isPresent())
-        {
-            System.out.println("Absent");
-    
-        }
-        
-
-        
+        rq.receive().get();
     }
 }
