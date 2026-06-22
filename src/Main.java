@@ -2,18 +2,30 @@ import java.util.Optional;
 
 public class Main 
 {
-    public static void main(String arg[])
+    public static void main(String arg[]) throws Exception
     {
         // MessageQueue<MessageDelivery> mq = new MessageQueue<>(5);
-
         ReliableQueue rq = new ReliableQueue(5);
 
-        System.out.println(rq.publish(new Message("hi")));
+        Message message1 = new Message("Task 1");
+        Message message2 = new Message("Task 2");
+        Message message3 = new Message("Task 3");
+        Message message4 = new Message("Task 4");
 
-        Message message = rq.receive().get();
+        rq.publish(message1);
+        rq.receive();
 
-        System.out.println(rq.ack(message.getId()));
+        // rq.ack(rq.receive().get().getId());
 
-        rq.receive().get();
+        rq.start();
+
+        for(int i = 0; i < 4; i++)
+        {
+            Thread.sleep(40000);
+            // rq.publish(message1);
+            rq.receive();
+        }
+
+        rq.stop();
     }
 }

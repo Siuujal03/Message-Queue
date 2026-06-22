@@ -1,8 +1,12 @@
 import java.util.UUID;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.Optional;
 import java.time.Instant;
+import java.time.Duration;
 
 public class ReliableQueue
 {
@@ -10,6 +14,8 @@ public class ReliableQueue
     private final Map<UUID, MessageDelivery> inFlightMessages;
     private final MessageQueue<MessageDelivery> deadLetterQueue;
     private final int maxRetries;
+    private final int timeoutSeconds;
+    private final ScheduledExecutorService scheduler;
     
 
     public ReliableQueue(int capacity)
@@ -23,6 +29,8 @@ public class ReliableQueue
         this.inFlightMessages = new ConcurrentHashMap<>();
 
         this.maxRetries = 3;
+        this.timeoutSeconds = 30;
+        this.scheduler = Executors.newScheduledThreadPool(1);
     }
 
     public boolean publish(Message message)
@@ -48,13 +56,8 @@ public class ReliableQueue
         UUID id = message.getId();
         int retryCount = oldMessageDelivery.getRetryCount();
 
-        if(retryCount > maxRetries)
-        {
-            deadLetterQueue.offer(oldMessageDelivery);
-            return Optional.empty();
-        }
 
-        MessageDelivery newMessageDelivery = new MessageDelivery(message, Instant.now(), retryCount + 1);
+        MessageDelivery newMessageDelivery = new MessageDelivery(message, Instant.now(), retryCount);
 
         // inFlightMessages.put(id, newMessageDelivery);
 
@@ -70,6 +73,46 @@ public class ReliableQueue
     }
 
 
+    public void start()
+    {
+
+        scheduler.scheduleWithFixedDelay(()->{
+            System.out.println("Scheduler Started");
+            inFlightMessages.forEach((key, value)->{
+                
+                Instant receivedAt = value.getReceivedAt();
+
+                Duration duration = Duration.between(receivedAt, Instant.now());
+
+                if(duration.compareTo(Duration.ofSeconds(timeoutSeconds)) >= 0)
+                {
+                    inFlightMessages.remove(key, value);
+                    int retryCount = value.getRetryCount();
+
+                    System.out.println("Retry Count : " + retryCount);
+
+                    if(retryCount == maxRetries)
+                    {
+                        System.out.println("Added to Dead Letter Queue");
+                        boolean isAccepted = deadLetterQueue.offer(value);
+                    }
+                    else
+                    {
+                        System.out.println("Added Back to Available Queue");
+                        MessageDelivery messageDelivery = new MessageDelivery(value.getMessage(), retryCount + 1);
+                        boolean isAccepted = availableQueue.offer(messageDelivery);
+                    }
+                }
+                
+            });
+        }, 0, 1, TimeUnit.SECONDS);
+    }
+
+    public void stop()
+    {
+        System.out.println("closing");
+        scheduler.shutdown();
+    }
 
 
 }
