@@ -14,7 +14,7 @@ public class Consumer
 
     public Optional<Message> consume()
     {
-        Message message = messageQueue.poll();
+        Message message = (Message) messageQueue.poll();
 
         return Optional.ofNullable(message);
     }
