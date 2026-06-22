@@ -5,14 +5,20 @@ public class MessageDelivery
     private final Instant receivedAt;
     private final int retryCount;
 
-    public MessageDelivery(Message message)
+    public MessageDelivery(Message message, int retryCount)
     {
         if(message == null)
         {
             throw new IllegalArgumentException("Message cannot be null");
         }
+        if(retryCount < 0)
+        {
+            throw new IllegalArgumentException("Retry count cannot be negative");
+        }
 
+        this.retryCount = retryCount;
         this.message = message;
+        this.receivedAt = null;
     }
 
     public MessageDelivery(Message message, Instant receivedAt, int retryCount)
