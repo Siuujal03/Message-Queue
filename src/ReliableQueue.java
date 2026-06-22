@@ -1,6 +1,6 @@
 import java.util.UUID;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Optional;
 import java.time.Instant;
 
@@ -20,7 +20,7 @@ public class ReliableQueue
         }
         this.availableQueue = new MessageQueue<>(5);
         this.deadLetterQueue = new MessageQueue<>(5);
-        this.inFlightMessages = new HashMap<>();
+        this.inFlightMessages = new ConcurrentHashMap<>();
 
         this.maxRetries = 3;
     }
@@ -56,7 +56,9 @@ public class ReliableQueue
 
         MessageDelivery newMessageDelivery = new MessageDelivery(message, Instant.now(), retryCount + 1);
 
-        inFlightMessages.put(id, newMessageDelivery);
+        // inFlightMessages.put(id, newMessageDelivery);
+
+        inFlightMessages.computeIfAbsent(id, key -> newMessageDelivery);
         
         return Optional.ofNullable(message);
 
